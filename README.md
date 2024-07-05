@@ -25,6 +25,12 @@ $ python main.py
 ```
 
 ## About the project
+### Features
+- Download images from Bing and Google using a custom query.
+- Option to filter downloaded images based on resolution.
+- Light, Dark, and System appearance modes.
+- User-friendly interface.
+
 ### Authors
 - [@anekobtw](https://www.github.com/anekobtw) 
 
