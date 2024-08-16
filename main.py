@@ -40,11 +40,10 @@ class App(ctk.CTk):
         mainbar_frame.grid(row=0, column=1, rowspan=4, pady=20, padx=20, sticky="nsew")
         self.query_entry = ctk.CTkEntry(mainbar_frame, placeholder_text="Query")
         self.query_entry.grid(row=0, column=0, padx=20, pady=10)
-        states = ["disabled", "normal"]
         self.filter_checkbox = ctk.CTkCheckBox(
             mainbar_frame,
             text="Filter",
-            command=lambda: [state.configure(state=states[self.filter_checkbox.get()], placeholder_text=text) for state, text in [(self.res_entry1, "height"), (self.res_entry2, "width")]]
+            command=lambda: [state.configure(state=["disabled", "normal"][self.filter_checkbox.get()], placeholder_text=text) for state, text in [(self.res_entry1, "height"), (self.res_entry2, "width")]]
         )
         self.filter_checkbox.grid(row=1, column=0, padx=20, pady=10)
 
