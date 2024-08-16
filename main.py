@@ -1,13 +1,14 @@
 import logging
 import os
 import shutil
+import uuid
 from pathlib import Path
 
 import customtkinter as ctk
 from icrawler.builtin import BingImageCrawler, GoogleImageCrawler
 from PIL import Image
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,11 +41,7 @@ class App(ctk.CTk):
         mainbar_frame.grid(row=0, column=1, rowspan=4, pady=20, padx=20, sticky="nsew")
         self.query_entry = ctk.CTkEntry(mainbar_frame, placeholder_text="Query")
         self.query_entry.grid(row=0, column=0, padx=20, pady=10)
-        self.filter_checkbox = ctk.CTkCheckBox(
-            mainbar_frame,
-            text="Filter",
-            command=lambda: [state.configure(state=["disabled", "normal"][self.filter_checkbox.get()], placeholder_text=text) for state, text in [(self.res_entry1, "height"), (self.res_entry2, "width")]]
-        )
+        self.filter_checkbox = ctk.CTkCheckBox(mainbar_frame, text="Filter", command=lambda: [state.configure(state=["disabled", "normal"][self.filter_checkbox.get()], placeholder_text=text) for state, text in [(self.res_entry1, "height"), (self.res_entry2, "width")]])
         self.filter_checkbox.grid(row=1, column=0, padx=20, pady=10)
 
         res_frame = ctk.CTkFrame(mainbar_frame, fg_color="transparent")
@@ -82,42 +79,33 @@ class App(ctk.CTk):
         bing_crawler.crawl(keyword=query, max_num=999)
 
     def filter_images(self, directory: str, height: int, width: int) -> None:
-        pics_dir = Path("Given resolution")
-        similar_res_dir = Path("Similar resolution")
-
-        pics_dir.mkdir(exist_ok=True)
-        similar_res_dir.mkdir(exist_ok=True)
+        # creating folders
+        Path("Given resolution").mkdir(exist_ok=True)
+        Path("Similar resolution").mkdir(exist_ok=True)
 
         for filename in os.listdir(directory):
             file_path = os.path.join(directory, filename)
-            if not file_path.lower().endswith(("png", "jpg", "jpeg")):
+
+            # save only pictures
+            if not filename.endswith(("png", "jpg", "jpeg")):
                 continue
 
-            try:
-                img = Image.open(file_path)
-                if img.size == (height, width):
-                    dst = pics_dir
-                elif img.size[0] / img.size[1] == height / width:
-                    dst = similar_res_dir
-                else:
-                    img.close()
-                    Path(file_path).unlink()
-                    logging.log(level=logging.INFO, msg=f"Deleted {file_path}")
-                    continue
-
+            img = Image.open(file_path)
+            # decide what to do with the file
+            if img.size == (height, width):
+                dst = Path("Given resolution")
+            elif img.size[0] / img.size[1] == height / width:
+                dst = Path("Similar resolution")
+            else:
                 img.close()
-                try:
-                    shutil.move(file_path, dst)
-                except shutil.Error:
-                    name, ext = os.path.splitext(filename)
-                    new_file_path = dst / f"{name}_2{ext}"
-                    shutil.move(file_path, new_file_path)
-                logging.log(level=logging.INFO, msg=f"Moved {file_path} to {dst}")
-            except (IOError, OSError) as e:
-                print(f"Error processing file {file_path}: {e}")
+                Path(file_path).unlink()
+                continue
 
-        if not os.listdir(directory):
-            Path(directory).rmdir()
+            # I use uuid because having two files with the same name will raise shutil.Error
+            img.close()
+            new_file_path = dst / f"{uuid.uuid4()}.png"
+            shutil.move(file_path, new_file_path)
+        Path(directory).rmdir()
 
 
 if __name__ == "__main__":
