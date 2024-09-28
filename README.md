@@ -1,24 +1,14 @@
 # images downloader
-![version](https://img.shields.io/badge/Project_version-1.1.0-blue)
+![version](https://img.shields.io/badge/Project_version-1.2.0-blue)
 ![licence](https://img.shields.io/badge/License-MIT-green)
 ![made with love](https://img.shields.io/badge/Made_with-Love-red)
 
 Quickly download images from Bing and Google based on a query. 
 
 ## Run Locally
-Clone the project
 ```bash
 $ git clone https://github.com/anekobtw/images-downloader.git
-```
-
-Install dependencies
-```bash
 $ pip install -r requirements.txt
-```
-
-Run the program
-
-```bash
 $ python main.py
 ```
 
