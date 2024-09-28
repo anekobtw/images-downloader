@@ -1,130 +1,98 @@
 import logging
-import shutil
-import uuid
 import os
-from pathlib import Path
 
 import customtkinter as ctk
-from icrawler.builtin import BingImageCrawler, GoogleImageCrawler
-from CTkMessagebox import CTkMessagebox
-from PIL import Image
 
+from utils import *
+
+# Basic configuring
 __version__ = "1.2.0"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
 ctk.set_default_color_theme("theme.json")
+PADX = 20
 
-class App(ctk.CTk):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.downloads_dir = Path("downloaded images")
-        self.downloads_dir.mkdir(exist_ok=True)
 
-        self.title("Images Downloader")
-        self.draw_infobar()
-        self.draw_settingsbar()
+# App config
+app = ctk.CTk()
+app.title = "Images Downloader"
+infobar = ctk.CTkFrame(app)
+infobar.grid(row=0, column=0, padx=PADX, pady=20, sticky="nsew")
+settingsbar = ctk.CTkFrame(app)
+settingsbar.grid(row=0, column=1, padx=PADX, pady=20, sticky="ew")
+font = ctk.CTkFont(size=20, weight="bold")
 
-    def draw_infobar(self) -> None:
-        sidebar = ctk.CTkFrame(self, width=140)
-        sidebar.grid(row=0, column=0, pady=20, padx=20, sticky="nsew")
 
-        # Info Label
-        ctk.CTkLabel(sidebar, text=f"Images Downloader {__version__}", font=ctk.CTkFont(size=20, weight="bold")).grid(padx=20, pady=(10, 0))
-        ctk.CTkLabel(sidebar, text="© anekobtw, 2024\ntheme by avalon60").grid(padx=10, pady=(5, 10))
+# Infobar
+ctk.CTkLabel(
+    infobar,
+    text=f"Images Downloader {__version__}",
+    font=font
+).grid(padx=PADX, pady=(10, 0))
 
-        # Query Entry and Download Button
-        self.query_entry = ctk.CTkEntry(sidebar, placeholder_text="Query")
-        self.query_entry.grid(padx=10, pady=(20, 0))
-        ctk.CTkButton(sidebar, text="Download", command=self.download).grid(padx=10, pady=(10, 20))
+ctk.CTkLabel(
+    infobar,
+    text="© anekobtw, 2024\ntheme by avalon60"
+).grid(padx=PADX, pady=(5, 10))
 
-        ctk.CTkButton(sidebar, text="Open Downloads Folder", command=lambda: os.startfile(self.downloads_dir)).grid(pady=5)
+query_entry = ctk.CTkEntry(infobar, placeholder_text="Query")
+query_entry.grid(padx=10, pady=(20, 0))
 
-    def draw_settingsbar(self) -> None:
-        settingsbar = ctk.CTkFrame(self)
-        settingsbar.grid(row=0, column=1, pady=20, padx=20, sticky="ew")
+ctk.CTkButton(
+    infobar,
+    text="Download",
+    command=download
+).grid(padx=10, pady=(10, 20))
+ctk.CTkButton(
+    infobar,
+    text="Open Downloads Folder",
+    command=lambda: os.startfile(DOWNLOADS)
+).grid(pady=5)
 
-        ctk.CTkLabel(settingsbar, text="Settings", font=ctk.CTkFont(size=20, weight="bold")).grid()
 
-        # Search Engine Checkboxes
-        gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-        gb_frame.grid(pady=10, padx=20, sticky="nsew")
+# Settings bar
+    # Frames
+gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
+gb_frame.grid(pady=10, padx=PADX, sticky="nsew")
+res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
+res_frame.grid(pady=(10, 40), padx=PADX, sticky="nsew")
 
-        self.google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
-        self.google_checkbox.pack(side="left", padx=(0, 100))
-        self.google_checkbox.select()
+ctk.CTkLabel(
+    settingsbar,
+    text="Settings",
+    font=font
+).grid()
 
-        self.bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=50, corner_radius=36)
-        self.bing_checkbox.pack(side="right")
-        self.bing_checkbox.select()
+google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
+google_checkbox.pack(side="left", padx=(0, 100))
+google_checkbox.select()
 
-        # Filter Checkbox
-        self.filter_checkbox = ctk.CTkCheckBox(settingsbar, text="Filter", width=50, command=self.update_entries)
-        self.filter_checkbox.grid(sticky="n")
+bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=70, corner_radius=36)
+bing_checkbox.pack(side="right")
+bing_checkbox.select()
 
-        # Resolution Entry Fields
-        res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-        res_frame.grid(pady=(10, 40), padx=20, sticky="nsew")
-        self.height_entry = ctk.CTkEntry(res_frame, width=50, placeholder_text="height")
-        self.height_entry.pack(side="left", padx=(0, 100))
-        self.width_entry = ctk.CTkEntry(res_frame, width=50, placeholder_text="width")
-        self.width_entry.pack(side="right")
-        self.update_entries()
+filter_checkbox = ctk.CTkCheckBox(
+    settingsbar,
+    text="Filter",
+    width=50,
+    command=update_entries
+)
+filter_checkbox.grid(sticky="n")
 
-    def update_entries(self) -> None:
-        """Enable or disable resolution entry fields based on filter checkbox."""
-        for entry in (self.height_entry, self.width_entry):
-            entry.configure(state=["disabled", "normal"][self.filter_checkbox.get()], placeholder_text=entry._placeholder_text)
+height_entry = ctk.CTkEntry(
+    res_frame,
+    width=50,
+    placeholder_text="height"
+)
+height_entry.pack(side="left", padx=(0, 100))
 
-    def download(self):
-        """Handle the download process based on user input."""
-        query = self.query_entry.get()
-        height, width = (int(self.height_entry.get()), int(self.width_entry.get())) if self.filter_checkbox.get() else (None, None)
-
-        for engine in ["google", "bing"]:
-            if getattr(self, f"{engine}_checkbox").get():
-                self.download_images(query, engine)
-                if height and width:
-                    self.filter_images(engine, height, width)
-
-        CTkMessagebox(title="Images downloader", message="Images have been downloaded!", option_1="Ok")
-
-    def download_images(self, query, engine):
-        """Download images using the specified search engine."""
-        download_dir = self.downloads_dir / engine
-        download_dir.mkdir(exist_ok=True)
-
-        crawler_cls = GoogleImageCrawler if engine == "google" else BingImageCrawler
-        crawler = crawler_cls(feeder_threads=200, parser_threads=200, downloader_threads=200,
-                              storage={"root_dir": download_dir})
-        crawler.crawl(keyword=query, max_num=999)
-
-    def filter_images(self, engine, height, width):
-        """Filter images based on given resolution."""
-        download_dir = self.downloads_dir / engine
-        given_res_dir = self.downloads_dir / "Given resolution"
-        similar_res_dir = self.downloads_dir / "Similar resolution"
-
-        # Create directories for filtered images
-        given_res_dir.mkdir(exist_ok=True)
-        similar_res_dir.mkdir(exist_ok=True)
-
-        for file in download_dir.glob("*.*"):
-            if file.suffix not in (".png", ".jpg", ".jpeg"):
-                continue
-            
-            img = Image.open(file)
-            dst = (given_res_dir if img.size == (height, width)
-                   else similar_res_dir if img.size[0] / img.size[1] == height / width else None)
-            img.close()
-            
-            if dst:
-                shutil.move(file, dst / f"{uuid.uuid4()}.png")
-            else:
-                file.unlink()
-
-        download_dir.rmdir()
+width_entry = ctk.CTkEntry(
+    res_frame,
+    width=50,
+    placeholder_text="width"
+)
+width_entry.pack(side="right")
 
 
 if __name__ == "__main__":
-    app = App()
     app.mainloop()
+    update_entries()
