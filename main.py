@@ -51,6 +51,7 @@ ctk.CTkButton(
     text="Download",
     command=lambda: download(query_entry.get(), height_entry.get(), width_entry.get()),
 ).grid(padx=10, pady=(10, 20))
+
 ctk.CTkButton(
     infobar,
     text="Open Downloads Folder",
@@ -63,13 +64,13 @@ ctk.CTkLabel(
     settingsbar,
     text="Settings",
     font=font
-).pack()
+).grid()
 
 google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
 google_checkbox.pack(side="left", padx=(0, 100))
 google_checkbox.select()
 
-bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=70, corner_radius=36)
+bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=50, corner_radius=36)
 bing_checkbox.pack(side="right")
 bing_checkbox.select()
 
