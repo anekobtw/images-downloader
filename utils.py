@@ -11,7 +11,7 @@ DOWNLOADS = Path("downloaded images")
 DOWNLOADS.mkdir(exist_ok=True)
 
 
-def update_entries(filter_checkbox: ctk.CTkCheckBox, *entries) -> None:
+def update_entries(filter_checkbox: ctk.CTkCheckBox, *entries: ctk.CTkEntry) -> None:
     """Enable or disable resolution entry fields based on filter checkbox."""
     for entry in entries:
         entry.configure(

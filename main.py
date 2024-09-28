@@ -15,10 +15,19 @@ PADX = 20
 # App config
 app = ctk.CTk()
 app.title = "Images Downloader"
+
 infobar = ctk.CTkFrame(app)
 infobar.grid(row=0, column=0, padx=PADX, pady=20, sticky="nsew")
+
 settingsbar = ctk.CTkFrame(app)
-settingsbar.grid(row=0, column=1, padx=PADX, pady=20, sticky="ew")
+settingsbar.grid(row=0, column=1, padx=PADX, pady=20, sticky="nsew")
+
+gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
+gb_frame.grid(pady=10, padx=PADX, sticky="nsew")
+
+res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
+res_frame.grid(pady=(10, 40), padx=PADX, sticky="nsew")
+
 font = ctk.CTkFont(size=20, weight="bold")
 
 
@@ -40,7 +49,7 @@ query_entry.grid(padx=10, pady=(20, 0))
 ctk.CTkButton(
     infobar,
     text="Download",
-    command=download
+    command=lambda: download(query_entry.get(), height_entry.get(), width_entry.get()),
 ).grid(padx=10, pady=(10, 20))
 ctk.CTkButton(
     infobar,
@@ -50,12 +59,6 @@ ctk.CTkButton(
 
 
 # Settings bar
-    # Frames
-gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-gb_frame.grid(pady=10, padx=PADX, sticky="nsew")
-res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-res_frame.grid(pady=(10, 40), padx=PADX, sticky="nsew")
-
 ctk.CTkLabel(
     settingsbar,
     text="Settings",
@@ -74,7 +77,7 @@ filter_checkbox = ctk.CTkCheckBox(
     settingsbar,
     text="Filter",
     width=50,
-    command=update_entries
+    command=lambda: update_entries(filter_checkbox, height_entry, width_entry)
 )
 filter_checkbox.grid(sticky="n")
 
@@ -83,6 +86,7 @@ height_entry = ctk.CTkEntry(
     width=50,
     placeholder_text="height"
 )
+height_entry.configure(state="disabled")
 height_entry.pack(side="left", padx=(0, 100))
 
 width_entry = ctk.CTkEntry(
@@ -90,9 +94,9 @@ width_entry = ctk.CTkEntry(
     width=50,
     placeholder_text="width"
 )
+width_entry.configure(state="disabled")
 width_entry.pack(side="right")
 
 
 if __name__ == "__main__":
     app.mainloop()
-    update_entries()
