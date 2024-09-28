@@ -63,7 +63,7 @@ ctk.CTkLabel(
     settingsbar,
     text="Settings",
     font=font
-).grid()
+).pack()
 
 google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
 google_checkbox.pack(side="left", padx=(0, 100))
