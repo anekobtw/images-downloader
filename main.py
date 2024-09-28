@@ -12,6 +12,7 @@ from PIL import Image
 __version__ = "1.2.0"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
+ctk.set_default_color_theme("theme.json")
 
 class App(ctk.CTk):
     def __init__(self, *args, **kwargs):
@@ -29,17 +30,12 @@ class App(ctk.CTk):
 
         # Info Label
         ctk.CTkLabel(sidebar, text=f"Images Downloader {__version__}", font=ctk.CTkFont(size=20, weight="bold")).grid(padx=20, pady=(10, 0))
-        ctk.CTkLabel(sidebar, text="© anekobtw, 2024").grid(padx=10, pady=(5, 10))
+        ctk.CTkLabel(sidebar, text="© anekobtw, 2024\ntheme by avalon60").grid(padx=10, pady=(5, 10))
 
         # Query Entry and Download Button
         self.query_entry = ctk.CTkEntry(sidebar, placeholder_text="Query")
         self.query_entry.grid(padx=10, pady=(20, 0))
         ctk.CTkButton(sidebar, text="Download", command=self.download).grid(padx=10, pady=(10, 20))
-
-        # Appearance Option Menu
-        self.appearance = ctk.CTkOptionMenu(sidebar, values=["Light", "Dark", "System"], command=lambda x: ctk.set_appearance_mode(x))
-        self.appearance.set("System")
-        self.appearance.grid(padx=10, pady=10)
 
         ctk.CTkButton(sidebar, text="Open Downloads Folder", command=lambda: os.startfile(self.downloads_dir)).grid(pady=5)
 
@@ -53,11 +49,11 @@ class App(ctk.CTk):
         gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
         gb_frame.grid(pady=10, padx=20, sticky="nsew")
 
-        self.google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", width=50)
+        self.google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
         self.google_checkbox.pack(side="left", padx=(0, 100))
         self.google_checkbox.select()
 
-        self.bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=50)
+        self.bing_checkbox = ctk.CTkCheckBox(gb_frame, text="Bing", width=50, corner_radius=36)
         self.bing_checkbox.pack(side="right")
         self.bing_checkbox.select()
 
@@ -90,7 +86,7 @@ class App(ctk.CTk):
                 if height and width:
                     self.filter_images(engine, height, width)
 
-        CTkMessagebox(title="Info", message="Done!", option_1="Ok")
+        CTkMessagebox(title="Images downloader", message="Images have been downloaded!", option_1="Ok")
 
     def download_images(self, query, engine):
         """Download images using the specified search engine."""
