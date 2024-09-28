@@ -6,7 +6,7 @@ import customtkinter as ctk
 from utils import *
 
 # Basic configuring
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ctk.set_default_color_theme("theme.json")
 PADX = 20
@@ -20,13 +20,13 @@ infobar = ctk.CTkFrame(app)
 infobar.grid(row=0, column=0, padx=PADX, pady=20, sticky="nsew")
 
 settingsbar = ctk.CTkFrame(app)
-settingsbar.grid(row=0, column=1, padx=PADX, pady=20, sticky="nsew")
+settingsbar.grid(row=0, column=1, padx=PADX, pady=20, sticky="ew")
 
 gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-gb_frame.grid(pady=10, padx=PADX, sticky="nsew")
+gb_frame.grid(row=1, pady=10, padx=PADX, sticky="nsew")
 
 res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-res_frame.grid(pady=(10, 40), padx=PADX, sticky="nsew")
+res_frame.grid(row=3, pady=(10, 40), padx=PADX, sticky="nsew")
 
 font = ctk.CTkFont(size=20, weight="bold")
 
@@ -56,7 +56,7 @@ ctk.CTkButton(
     infobar,
     text="Open Downloads Folder",
     command=lambda: os.startfile(DOWNLOADS)
-).grid(pady=5)
+).grid(pady=(5, 13))
 
 
 # Settings bar
@@ -64,7 +64,7 @@ ctk.CTkLabel(
     settingsbar,
     text="Settings",
     font=font
-).grid()
+).grid(row=0, pady=(10, 0))
 
 google_checkbox = ctk.CTkCheckBox(gb_frame, text="Google", corner_radius=36)
 google_checkbox.pack(side="left", padx=(0, 100))
@@ -80,7 +80,7 @@ filter_checkbox = ctk.CTkCheckBox(
     width=50,
     command=lambda: update_entries(filter_checkbox, height_entry, width_entry)
 )
-filter_checkbox.grid(sticky="n")
+filter_checkbox.grid(row=2, sticky="n")
 
 height_entry = ctk.CTkEntry(
     res_frame,
