@@ -9,11 +9,7 @@ from icrawler.builtin import BingImageCrawler, GoogleImageCrawler
 from PIL import Image
 
 __version__ = "1.2.0"
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 class App(ctk.CTk):
@@ -51,58 +47,32 @@ class App(ctk.CTk):
         self.res_entry2 = ctk.CTkEntry(res_frame, state="disabled", width=50)
         self.res_entry2.pack(side="right")
 
-    def download(self) -> None:
+    def download(self):
         self.download_images(self.query_entry.get())
 
-        if self.filter_checkbox.get() == 0:
-            return
-        self.filter_images("google", int(self.res_entry1.get()), int(self.res_entry2.get()))
-        self.filter_images("bing", int(self.res_entry1.get()), int(self.res_entry2.get()))
+        if self.filter_checkbox.get():
+            height, width = int(self.res_entry1.get()), int(self.res_entry2.get())
+            for src in ("google", "bing"):
+                self.filter_images(src, height, width)
 
-    def download_images(self, query: str) -> None:
-        google_crawler = GoogleImageCrawler(
-            feeder_threads=200,
-            parser_threads=200,
-            downloader_threads=200,
-            storage={"root_dir": "google"},
-        )
-        google_crawler.crawl(keyword=query, max_num=999)
+    def download_images(self, query):
+        for src, Crawler in zip(["google", "bing"], [GoogleImageCrawler, BingImageCrawler]):
+            crawler = Crawler(feeder_threads=200, parser_threads=200, downloader_threads=200, storage={"root_dir": src})
+            crawler.crawl(keyword=query, max_num=999)
 
-        bing_crawler = BingImageCrawler(
-            feeder_threads=200,
-            parser_threads=200,
-            downloader_threads=200,
-            storage={"root_dir": "bing"},
-        )
-        bing_crawler.crawl(keyword=query, max_num=999)
-
-    def filter_images(self, directory: str, height: int, width: int) -> None:
-        # creating folders
+    def filter_images(self, directory, height, width):
         Path("Given resolution").mkdir(exist_ok=True)
         Path("Similar resolution").mkdir(exist_ok=True)
-
-        for filename in os.listdir(directory):
-            file_path = os.path.join(directory, filename)
-
-            # save only pictures
-            if not filename.endswith(("png", "jpg", "jpeg")):
+        for file in Path(directory).glob("*.*"):
+            if file.suffix not in (".png", ".jpg", ".jpeg"):
                 continue
-
-            img = Image.open(file_path)
-            # decide what to do with the file
-            if img.size == (height, width):
-                dst = Path("Given resolution")
-            elif img.size[0] / img.size[1] == height / width:
-                dst = Path("Similar resolution")
-            else:
-                img.close()
-                Path(file_path).unlink()
-                continue
-
-            # I use uuid because having two files with the same name will raise shutil.Error
+            img = Image.open(file)
+            dst = Path("Given resolution") if img.size == (height, width) else Path("Similar resolution") if img.size[0] / img.size[1] == height / width else None
             img.close()
-            new_file_path = dst / f"{uuid.uuid4()}.png"
-            shutil.move(file_path, new_file_path)
+            if dst:
+                shutil.move(file, dst / f"{uuid.uuid4()}.png")
+            else:
+                file.unlink()
         Path(directory).rmdir()
 
 
