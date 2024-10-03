@@ -3,7 +3,7 @@ import os
 
 import customtkinter as ctk
 
-from utils import *
+from src.utils import *
 
 # Basic configuring
 __version__ = "1.2.1"
@@ -26,7 +26,7 @@ gb_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
 gb_frame.grid(row=1, pady=10, padx=PADX, sticky="nsew")
 
 res_frame = ctk.CTkFrame(settingsbar, fg_color="transparent")
-res_frame.grid(row=3, pady=(10, 40), padx=PADX, sticky="nsew")
+res_frame.grid(row=3, pady=10, padx=PADX, sticky="nsew")
 
 font = ctk.CTkFont(size=20, weight="bold")
 
@@ -49,7 +49,7 @@ query_entry.grid(padx=10, pady=(20, 0))
 ctk.CTkButton(
     infobar,
     text="Download",
-    command=lambda: download(query_entry.get(), height_entry.get(), width_entry.get()),
+    command=lambda: download(query_entry.get(), height_entry.get(), width_entry.get(), rembg_checkbox.get(), google_checkbox.get(), bing_checkbox.get()),
 ).grid(padx=10, pady=(10, 20))
 
 ctk.CTkButton(
@@ -75,12 +75,12 @@ bing_checkbox.pack(side="right")
 bing_checkbox.select()
 
 filter_checkbox = ctk.CTkCheckBox(
-    settingsbar,
+    res_frame,
     text="Filter",
     width=50,
     command=lambda: update_entries(filter_checkbox, height_entry, width_entry)
 )
-filter_checkbox.grid(row=2, sticky="n")
+filter_checkbox.grid(row=0, column=0, padx=(0, PADX))
 
 height_entry = ctk.CTkEntry(
     res_frame,
@@ -88,7 +88,7 @@ height_entry = ctk.CTkEntry(
     placeholder_text="height"
 )
 height_entry.configure(state="disabled")
-height_entry.pack(side="left", padx=(0, 100))
+height_entry.grid(row=0, column=1, padx=PADX)
 
 width_entry = ctk.CTkEntry(
     res_frame,
@@ -96,8 +96,10 @@ width_entry = ctk.CTkEntry(
     placeholder_text="width"
 )
 width_entry.configure(state="disabled")
-width_entry.pack(side="right")
+width_entry.grid(row=0, column=2, padx=(PADX, 0))
 
+rembg_checkbox = ctk.CTkCheckBox(settingsbar, text="Remove BG", width=50, corner_radius=36)
+rembg_checkbox.grid(row=4, pady=(0, 20))
 
 if __name__ == "__main__":
     app.mainloop()

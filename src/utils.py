@@ -4,8 +4,9 @@ from pathlib import Path
 
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
-from icrawler.builtin import BingImageCrawler, GoogleImageCrawler
+from icrawler.builtin import GoogleImageCrawler
 from PIL import Image
+from rembg import remove
 
 DOWNLOADS = Path("downloaded images")
 DOWNLOADS.mkdir(exist_ok=True)
@@ -20,14 +21,21 @@ def update_entries(filter_checkbox: ctk.CTkCheckBox, *entries: ctk.CTkEntry) -> 
         )
 
 
-def download(query: str, height: int = None, width: int = None) -> None:
+def download(query: str, height: int = None, width: int = None, do_rembg: bool = False, google: bool = False, bing: bool = False) -> None:
     """Handle the download process based on user input."""
-    for engine in ("google", "bing"):
-        if getattr(f"{engine}_checkbox").get():
-            download_images(query, engine)
-            if height and width:
-                filter_images(engine, height, width)
+    engine = "google"
 
+    for engine, enabled in engines.items():
+        if not enabled:
+            continue
+        download_images(query, engine)
+        if do_rembg:
+            for file in (DOWNLOADS / engine).iterdir():
+                img = Image.open(str(file)).convert("RGBA")
+                output = remove(img)
+                output.save(str(file)[:-4] + ".png")
+        if height and width:
+            filter_images(engine, height, width)
     CTkMessagebox(title="Images downloader", message="Images have been downloaded!", options=["Ok"])
 
 
