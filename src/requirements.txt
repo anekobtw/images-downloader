@@ -1,6 +1,5 @@
-CTkMessagebox==2.7
-CTkMessagebox==2.7
 customtkinter==5.2.2
 icrawler==0.6.9
 Pillow==10.4.0
+pinterest_crawler==0.2.0
 rembg==2.0.59
